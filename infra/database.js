@@ -9,7 +9,7 @@ async function query(queryObject) {
     password: process.env.POSTGRES_PASSWORD,
     ssl: getSSLValues(),
   });
-  console.log("SSL Values ", getSSLValues());
+
   try {
     await client.connect();
     const result = await client.query(queryObject);
