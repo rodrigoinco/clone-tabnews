@@ -1,0 +1,24 @@
+# Function to print messages in different colors
+print_step() {
+  echo -e "\033[1;34m$1\033[0m" # Blue color for step headers
+}
+
+print_success() {
+  echo -e "\033[1;32m$1\033[0m" # Green color for success messages
+}
+
+print_error() {
+  echo -e "\033[1;31m$1\033[0m" # Red color for error messages
+}
+
+
+echo "Checking for secrets with gitleaks-secret-scanner..."
+
+# Step 5: Secret Scan
+print_step "\nRunning Secret Scan"
+if ! npm run secret-scan; then
+  print_error "Secret Scan failed. Aborting."
+  exit 1
+fi
+
+print_success "Secret Scan complete. Ready to commit!"

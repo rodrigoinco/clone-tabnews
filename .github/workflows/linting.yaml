@@ -46,3 +46,35 @@ jobs:
       - run: npm ci
 
       - run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+
+  gitleaks-scan:
+    name: Gitleaks-Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "lts/hydrogen"
+
+      - run: npm install -g gitleaks-secret-scanner
+
+      - id: scan
+        continue-on-error: true
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: gitleaks-secret-scanner --diff-mode ci --html-report scan-report.html
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-scan-report
+          path: scan-report.html
+
+      - if: steps.scan.outcome == 'failure'
+        run: |
+          echo "❌ Secrets were detected in the pull request. See the 'gitleaks-scan-report' artifact for details."
+          exit 1
